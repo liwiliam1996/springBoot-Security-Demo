@@ -1,4 +1,4 @@
-package com.erqiang.security.controller;
+package com.wiliam.security.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
