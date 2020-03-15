@@ -1,2 +1,10 @@
 server:
   port: 9090
+
+liwiliam:
+  security:
+    properties:
+      validate:
+        image:
+          length: 6
+          width: 100
