@@ -1,6 +1,8 @@
 package com.wiliam.security.controller;
 
 import com.wiliam.security.Validate.code.ImageCode;
+import com.wiliam.security.properties.SecurityProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,9 @@ public class ValidateCodeController {
 
     public static final String SESSION_KEY = "imageCode_key";
 
+    @Autowired
+    private SecurityProperties securityProperties;
+
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
 
     /**
@@ -42,8 +47,8 @@ public class ValidateCodeController {
     }
 
     private ImageCode createImageCode(HttpServletRequest request) {
-        int width = 67;
-        int height = 23;
+        int width = securityProperties.getValidate().getImage().getWidth();
+        int height = securityProperties.getValidate().getImage().getHeight();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         //获得画笔
         Graphics g = image.getGraphics();
@@ -60,13 +65,13 @@ public class ValidateCodeController {
             g.drawLine(x, y, x1, y1);
         }
         String sRand = "";
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < securityProperties.getValidate().getImage().getLength(); i++) {
             String rand = String.valueOf(random.nextInt(10));
             sRand += rand;
             g.setColor(new Color(20 + random.nextInt(110), 20 + random.nextInt(110), 20 + random.nextInt(110)));
             g.drawString(rand, 13 * i + 6, 16);
         } g.dispose();
-        return new ImageCode(image, sRand, 60);
+        return new ImageCode(image, sRand, securityProperties.getValidate().getImage().getExpireIn());
 
     }
 

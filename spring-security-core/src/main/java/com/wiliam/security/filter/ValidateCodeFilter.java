@@ -5,10 +5,8 @@ import com.wiliam.security.exception.ValidateCodeException;
 import com.wiliam.security.handle.AuthenticationFailureHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
 import org.springframework.social.connect.web.SessionStrategy;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.ServletRequestUtils;
@@ -29,7 +27,7 @@ import java.io.IOException;
 public class ValidateCodeFilter extends OncePerRequestFilter {
 
     private AuthenticationFailureHandler authenticationFailureHandler;
-
+    public static final String SESSION_KEY = "imageCode_key";
     private SessionStrategy sessionStrategy = new HttpSessionSessionStrategy();
 
     @Override
@@ -53,7 +51,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
      */
     private void validateCode(ServletWebRequest servletWebRequest) throws ServletRequestBindingException {
         //从SESSION中获取验证码
-        ImageCode codeInSession = (ImageCode) sessionStrategy.getAttribute(servletWebRequest, "imageCode_key");
+        ImageCode codeInSession = (ImageCode) sessionStrategy.getAttribute(servletWebRequest, SESSION_KEY);
         //从ServletRequest中获取验证码
         String codeInRequest = ServletRequestUtils.getStringParameter(servletWebRequest.getRequest(), "imageCode");
         //验证码过期
@@ -61,7 +59,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
             throw new ValidateCodeException("验证码不存在");
         }
         if (codeInSession.isExpire()) {
-            sessionStrategy.removeAttribute(servletWebRequest, "imageCode_key");
+            sessionStrategy.removeAttribute(servletWebRequest, SESSION_KEY);
             throw new ValidateCodeException("验证码过期,请重新获取验证码");
         }
         if (StringUtils.isEmpty(codeInRequest)) {
@@ -70,7 +68,7 @@ public class ValidateCodeFilter extends OncePerRequestFilter {
         if (!StringUtils.pathEquals(codeInSession.getCode(), codeInRequest)) {
             throw new ValidateCodeException("验证码不匹配");
         }
-        sessionStrategy.removeAttribute(servletWebRequest, "imageCode_key");
+        sessionStrategy.removeAttribute(servletWebRequest, SESSION_KEY);
     }
 
     public ValidateCodeFilter(AuthenticationFailureHandler authenticationFailureHandler, SessionStrategy sessionStrategy) {
